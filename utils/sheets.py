@@ -1,3 +1,4 @@
+import streamlit as st
 import gspread
 import pandas as pd
 from google.oauth2.service_account import Credentials
@@ -8,9 +9,9 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive"
 ]
 
-# Authenticate
-creds = Credentials.from_service_account_file(
-    "credentials.json",
+# Authenticate using Streamlit Secrets
+creds = Credentials.from_service_account_info(
+    st.secrets["gcp_service_account"],
     scopes=SCOPES
 )
 
