@@ -8,7 +8,7 @@ st.set_page_config(
 )
 
 # ------------------------------------
-# Page Style
+# Page Styling
 # ------------------------------------
 st.markdown("""
 <style>
@@ -24,7 +24,7 @@ st.markdown("""
 # Title
 # ------------------------------------
 st.title("🏆 Results")
-st.caption("Completed match results")
+st.caption("Live tournament results")
 
 st.markdown("---")
 
@@ -34,24 +34,22 @@ st.markdown("---")
 df = read_sheet("Matches")
 
 # ------------------------------------
-# Show only completed matches
-# (WinningTeam is filled)
+# Display Results
 # ------------------------------------
-results = df[df["WinningTeam"].astype(str).str.strip() != ""]
-
-if results.empty:
-    st.info("No match results available yet.")
+if df.empty:
+    st.info("No match data available.")
 else:
 
-    display_df = results[
+    display_df = df[
         [
             "Match No.",
             "Game",
             "Category",
             "Fixture",
+            "Match Date",
             "Players",
             "Match Points",
-            "WinningTeam"
+            "Winning Team"
         ]
     ]
 
