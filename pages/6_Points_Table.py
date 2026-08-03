@@ -45,7 +45,7 @@ else:
             "Winner",
             "Runner Up",
             "2nd Runner Up",
-            "Rampage Aquad",
+            "Rampage Squad",
             "Noob Masters",
             "Zero Practise Club"
         ]
