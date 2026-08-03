@@ -26,24 +26,56 @@ st.markdown("""
 st.title("🏆 Results")
 st.caption("Live tournament results")
 
-st.markdown("---")
-
 # ------------------------------------
 # Read Google Sheet
 # ------------------------------------
 df = read_sheet("Matches")
 
 # ------------------------------------
-# Display Results
+# Sports Selector
 # ------------------------------------
-if df.empty:
-    st.info("No match data available.")
+sports = [
+    "Chess",
+    "Carrom",
+    "Table Tennis",
+    "Badminton",
+    "Gully Cricket",
+    "Foosball",
+    "Quiz"
+]
+
+icons = {
+    "Chess": "♟",
+    "Carrom": "🪙",
+    "Table Tennis": "🏓",
+    "Badminton": "🏸",
+    "Gully Cricket": "🏏",
+    "Foosball": "⚽",
+    "Quiz": "❓"
+}
+
+selected = st.pills(
+    "Select Sport",
+    sports,
+    default="Chess",
+    format_func=lambda x: f"{icons[x]}  {x}"
+)
+
+# ------------------------------------
+# Filter by Sport
+# ------------------------------------
+results = df[df["Game"] == selected]
+
+# ------------------------------------
+# Display Table
+# ------------------------------------
+if results.empty:
+    st.info(f"No matches available for {selected}.")
 else:
 
-    display_df = df[
+    display_df = results[
         [
             "Match No.",
-            "Game",
             "Category",
             "Fixture",
             "Match Date",
