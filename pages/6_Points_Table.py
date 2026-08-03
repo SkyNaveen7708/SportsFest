@@ -4,7 +4,11 @@ from utils.sheets import read_sheet
 # ------------------------------------
 # Page Config
 # ------------------------------------
-st.set_page_config(page_title="Points Table", page_icon="📊", layout="wide")
+st.set_page_config(
+    page_title="Points Table",
+    page_icon="📊",
+    layout="wide"
+)
 
 st.markdown("""
 <style>
@@ -41,9 +45,9 @@ else:
             "Winner",
             "Runner Up",
             "2nd Runner Up",
-            "Team A Points",
-            "Team B Points",
-            "Team C Points"
+            "Rampage Aquad",
+            "Noob Masters",
+            "Zero Practise Club"
         ]
     ]
 
