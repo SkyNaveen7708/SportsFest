@@ -101,10 +101,12 @@ if not game_results.empty:
     )
 
 # ------------------------------------
-# Overall Winners
+# Overall Winners (Selected Game Only)
 # ------------------------------------
+game_results = results_df[results_df["Game"] == selected_sport]
+
 overall = (
-    results_df["Game Winner"]
+    game_results["Game Winner"]
     .dropna()
     .astype(str)
 )
