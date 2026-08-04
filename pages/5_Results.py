@@ -1,15 +1,15 @@
 import streamlit as st
 from utils.sheets import read_sheet
 
+# ------------------------------------
+# Page Config
+# ------------------------------------
 st.set_page_config(
     page_title="Results",
     page_icon="🏆",
     layout="wide"
 )
 
-# ------------------------------------
-# Page Styling
-# ------------------------------------
 st.markdown("""
 <style>
 .block-container{
@@ -27,53 +27,54 @@ st.title("🏆 Results")
 st.caption("Live tournament results")
 
 # ------------------------------------
-# Read Google Sheet
+# Read Google Sheets
 # ------------------------------------
-df = read_sheet("Matches")
+matches_df = read_sheet("Matches")
+results_df = read_sheet("Results")
 
 # ------------------------------------
 # Sports Selector
 # ------------------------------------
-sports = [
-    "Chess",
-    "Carrom",
-    "Table Tennis",
-    "Badminton",
-    "Gully Cricket",
-    "Foosball",
-    "Quiz"
+games = [
+    ("♟", "Chess"),
+    ("🪙", "Carrom"),
+    ("🏓", "Table Tennis"),
+    ("🏸", "Badminton"),
+    ("🏏", "Gully Cricket"),
+    ("⚽", "Foosball"),
+    ("❓", "Quiz"),
 ]
 
-icons = {
-    "Chess": "♟",
-    "Carrom": "🪙",
-    "Table Tennis": "🏓",
-    "Badminton": "🏸",
-    "Gully Cricket": "🏏",
-    "Foosball": "⚽",
-    "Quiz": "❓"
-}
+st.write("### Select Sport")
 
-selected = st.pills(
-    "Select Sport",
-    sports,
-    default="Chess",
-    format_func=lambda x: f"{icons[x]}  {x}"
-)
+cols = st.columns(len(games))
 
-# ------------------------------------
-# Filter by Sport
-# ------------------------------------
-results = df[df["Game"] == selected]
+if "selected_game" not in st.session_state:
+    st.session_state.selected_game = "Chess"
+
+for i, (icon, game) in enumerate(games):
+    with cols[i]:
+        if st.button(
+            f"{icon} {game}",
+            use_container_width=True,
+            type="primary" if st.session_state.selected_game == game else "secondary",
+        ):
+            st.session_state.selected_game = game
+
+selected = st.session_state.selected_game
 
 # ------------------------------------
-# Display Table
+# Match Results
 # ------------------------------------
-if results.empty:
+match_df = matches_df[matches_df["Game"] == selected]
+
+st.markdown("## 📋 Match Results")
+
+if match_df.empty:
     st.info(f"No matches available for {selected}.")
 else:
 
-    display_df = results[
+    display_df = match_df[
         [
             "Match No.",
             "Category",
@@ -81,12 +82,57 @@ else:
             "Match Date",
             "Players",
             "Match Points",
-            "Winning Team"
+            "Winning Team",
         ]
     ]
 
     st.dataframe(
         display_df,
-        use_container_width=True,
-        hide_index=True
+        width="stretch",
+        hide_index=True,
+    )
+
+# ------------------------------------
+# Category Winners
+# ------------------------------------
+st.markdown("## 🏅 Category Winners")
+
+game_results = results_df[results_df["Game"] == selected]
+
+if game_results.empty:
+    st.info("Category winners not updated yet.")
+
+else:
+
+    winners_df = game_results[
+        [
+            "Category",
+            "Winner",
+            "Points",
+        ]
+    ]
+
+    st.dataframe(
+        winners_df,
+        width="stretch",
+        hide_index=True,
+    )
+
+# ------------------------------------
+# Overall Winner
+# ------------------------------------
+overall = (
+    game_results["Game Winner"]
+    .dropna()
+    .astype(str)
+)
+
+overall = overall[overall.str.strip() != ""]
+
+if len(overall):
+
+    st.markdown("## 🏆 Overall Winner")
+
+    st.success(
+        f"🥇 {overall.iloc[0]}"
     )
