@@ -33,106 +33,90 @@ matches_df = read_sheet("Matches")
 results_df = read_sheet("Results")
 
 # ------------------------------------
-# Sports Selector
+# Sport Selector
 # ------------------------------------
-games = [
-    ("♟", "Chess"),
-    ("🪙", "Carrom"),
-    ("🏓", "Table Tennis"),
-    ("🏸", "Badminton"),
-    ("🏏", "Gully Cricket"),
-    ("⚽", "Foosball"),
-    ("❓", "Quiz"),
+sports = [
+    "Chess",
+    "Carrom",
+    "Table Tennis",
+    "Badminton",
+    "Gully Cricket",
+    "Foosball",
+    "Quiz",
 ]
 
-st.write("### Select Sport")
-
-cols = st.columns(len(games))
-
-if "selected_game" not in st.session_state:
-    st.session_state.selected_game = "Chess"
-
-for i, (icon, game) in enumerate(games):
-    with cols[i]:
-        if st.button(
-            f"{icon} {game}",
-            use_container_width=True,
-            type="primary" if st.session_state.selected_game == game else "secondary",
-        ):
-            st.session_state.selected_game = game
-
-selected = st.session_state.selected_game
+selected_sport = st.pills(
+    "Select Sport",
+    sports,
+    selection_mode="single",
+    default="Chess"
+)
 
 # ------------------------------------
-# Match Results
+# Filter Matches
 # ------------------------------------
-match_df = matches_df[matches_df["Game"] == selected]
+game_df = matches_df[matches_df["Game"] == selected_sport]
 
-st.markdown("## 📋 Match Results")
-
-if match_df.empty:
-    st.info(f"No matches available for {selected}.")
+if game_df.empty:
+    st.info(f"No matches available for {selected_sport}.")
 else:
 
-    display_df = match_df[
-        [
-            "Match No.",
-            "Category",
-            "Fixture",
-            "Match Date",
-            "Players",
-            "Match Points",
-            "Winning Team",
-        ]
+    required_columns = [
+        "Match No.",
+        "Category",
+        "Fixture",
+        "Match Date",
+        "Players",
+        "Match Points",
+        "Winning Team"
     ]
 
+    for col in required_columns:
+        if col not in game_df.columns:
+            game_df[col] = ""
+
     st.dataframe(
-        display_df,
-        width="stretch",
-        hide_index=True,
+        game_df[required_columns],
+        use_container_width=True,
+        hide_index=True
     )
 
 # ------------------------------------
 # Category Winners
 # ------------------------------------
-st.markdown("## 🏅 Category Winners")
+game_results = results_df[results_df["Game"] == selected_sport]
 
-game_results = results_df[results_df["Game"] == selected]
+if not game_results.empty:
 
-if game_results.empty:
-    st.info("Category winners not updated yet.")
+    st.markdown("## 🏅 Category Winners")
 
-else:
-
-    winners_df = game_results[
-        [
-            "Category",
-            "Winner",
-            "Points",
-        ]
-    ]
+    category_df = game_results[
+        ["Category", "Winner", "Points"]
+    ].copy()
 
     st.dataframe(
-        winners_df,
-        width="stretch",
-        hide_index=True,
+        category_df,
+        use_container_width=True,
+        hide_index=True
     )
 
 # ------------------------------------
-# Overall Winner
+# Overall Winners
 # ------------------------------------
 overall = (
-    game_results["Game Winner"]
+    results_df["Game Winner"]
     .dropna()
     .astype(str)
 )
 
 overall = overall[overall.str.strip() != ""]
 
-if len(overall):
+if len(overall) > 0:
 
-    st.markdown("## 🏆 Overall Winner")
+    st.markdown("## 🏆 Overall Winners")
 
-    st.success(
-        f"🥇 {overall.iloc[0]}"
-    )
+    medals = ["🥇", "🥈", "🥉"]
+
+    for i, winner in enumerate(overall):
+        medal = medals[i] if i < len(medals) else "🏅"
+        st.success(f"{medal} {winner}")
